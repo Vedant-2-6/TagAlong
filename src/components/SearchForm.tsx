@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Calendar, PackageCheck } from 'lucide-react';
+import { Search, Calendar, PackageCheck, Box } from 'lucide-react';
 
 interface SearchFormProps {
   onSearch: (params: SearchParams) => void;
@@ -13,6 +13,7 @@ export interface SearchParams {
   isFragile: boolean;
   weight: number;
   urgency: 'normal' | 'express';
+  productType: string;
 }
 
 const SearchForm: React.FC<SearchFormProps> = ({ onSearch, className = '' }) => {
@@ -22,6 +23,7 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, className = '' }) => 
   const [isFragile, setIsFragile] = useState(false);
   const [weight, setWeight] = useState<number>(5);
   const [urgency, setUrgency] = useState<'normal' | 'express'>('normal');
+  const [productType, setProductType] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,7 +34,8 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, className = '' }) => 
       date,
       isFragile,
       weight,
-      urgency
+      urgency,
+      productType
     });
   };
 
@@ -122,7 +125,27 @@ const SearchForm: React.FC<SearchFormProps> = ({ onSearch, className = '' }) => 
         </div>
 
         {showAdvanced && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="productType" className="block text-sm font-medium text-gray-700 mb-1">
+                Product Type
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="productType"
+                  placeholder="e.g., Electronics, Furniture, Clothes"
+                  value={productType}
+                  onChange={(e) => setProductType(e.target.value)}
+                  className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  required
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Box size={18} className="text-gray-400" />
+                </div>
+              </div>
+            </div>
+
             <div>
               <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
                 Weight (kg)
