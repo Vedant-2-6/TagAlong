@@ -6,7 +6,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HeroSection from '../components/HeroSection';
 import { mockListings } from '../data/mockData';
 import ListingCard from '../components/ListingCard';
-import Chat from './components/Chat'
 
 
 gsap.registerPlugin(ScrollTrigger);
