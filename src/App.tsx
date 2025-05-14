@@ -7,6 +7,7 @@ import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import { LoginPage, SignupPage } from './pages/AuthPages';
+import {Chat} from './components/Chat'
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -28,6 +29,8 @@ function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/chat" element={<Chat />} />
+            
           </Routes>
         </Layout>
       </Router>
