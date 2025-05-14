@@ -16,50 +16,92 @@ const HomePage: React.FC = () => {
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // How it works animation
+    // Smooth scroll setup
+    gsap.config({
+      autoSleep: 60,
+      force3D: true,
+    });
+
+    // How it works animation with smooth reveal
     if (howItWorksRef.current) {
       gsap.from('.step-item', {
         opacity: 0,
         y: 50,
         stagger: 0.2,
-        duration: 0.8,
+        duration: 1,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: howItWorksRef.current,
           start: 'top 80%',
+          end: 'bottom 20%',
+          toggleActions: 'play none none reverse',
+          markers: false,
         },
       });
     }
 
-    // Testimonials animation
+    // Testimonials animation with cards sliding in
     if (testimonialsRef.current) {
       gsap.from('.testimonial-card', {
         opacity: 0,
-        y: 40,
-        stagger: 0.15,
-        duration: 0.7,
+        x: -50,
+        stagger: 0.2,
+        duration: 1,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: testimonialsRef.current,
           start: 'top 75%',
+          end: 'bottom 25%',
+          toggleActions: 'play none none reverse',
+          markers: false,
         },
       });
     }
 
-    // Stats animation
+    // Stats animation with counter effect
     if (statsRef.current) {
       gsap.from('.stat-item', {
         opacity: 0,
-        y: 30,
-        stagger: 0.15,
-        duration: 0.7,
-        ease: 'power3.out',
+        scale: 0.8,
+        stagger: 0.2,
+        duration: 1,
+        ease: 'back.out(1.7)',
         scrollTrigger: {
           trigger: statsRef.current,
           start: 'top 80%',
+          end: 'bottom 20%',
+          toggleActions: 'play none none reverse',
+          markers: false,
         },
       });
+
+      // Add number counter animation
+      document.querySelectorAll('.stat-number').forEach((stat) => {
+        const finalNum = parseInt(stat.textContent || '0', 10);
+        gsap.from(stat, {
+          textContent: 0,
+          duration: 2,
+          ease: 'power1.out',
+          snap: { textContent: 1 },
+          stagger: {
+            each: 0.2,
+            onUpdate: function() {
+              stat.textContent = Math.ceil(this.targets()[0].textContent);
+            },
+          },
+          scrollTrigger: {
+            trigger: statsRef.current,
+            start: 'top 80%',
+            toggleActions: 'play none none reverse',
+          },
+        });
+      });
     }
+
+    // Cleanup
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
   }, []);
 
   return (
@@ -275,7 +317,7 @@ const HomePage: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-500 bg-opacity-20 rounded-full mb-4">
                   <Users size={24} className="text-teal-300" />
                 </div>
-                <div className="text-4xl font-bold mb-2">25K+</div>
+                <div className="text-4xl font-bold mb-2 stat-number">25K+</div>
                 <div className="text-teal-200">Active Users</div>
               </div>
             </div>
@@ -285,7 +327,7 @@ const HomePage: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-500 bg-opacity-20 rounded-full mb-4">
                   <Truck size={24} className="text-teal-300" />
                 </div>
-                <div className="text-4xl font-bold mb-2">18K+</div>
+                <div className="text-4xl font-bold mb-2 stat-number">18K+</div>
                 <div className="text-teal-200">Successful Deliveries</div>
               </div>
             </div>
@@ -295,7 +337,7 @@ const HomePage: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-500 bg-opacity-20 rounded-full mb-4">
                   <Globe size={24} className="text-teal-300" />
                 </div>
-                <div className="text-4xl font-bold mb-2">150+</div>
+                <div className="text-4xl font-bold mb-2 stat-number">150+</div>
                 <div className="text-teal-200">Cities Covered</div>
               </div>
             </div>
@@ -305,7 +347,7 @@ const HomePage: React.FC = () => {
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-teal-500 bg-opacity-20 rounded-full mb-4">
                   <PackageCheck size={24} className="text-teal-300" />
                 </div>
-                <div className="text-4xl font-bold mb-2">98%</div>
+                <div className="text-4xl font-bold mb-2 stat-number">98%</div>
                 <div className="text-teal-200">Satisfaction Rate</div>
               </div>
             </div>
