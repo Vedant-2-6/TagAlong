@@ -21,8 +21,16 @@ const Chat: React.FC<ChatProps> = ({
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
-  const recipient = mockUsers.find(user => user.id === recipientId) as User;
+  const typingTimeoutRef = useRef<number>();
+  const recipient = mockUsers.find(user => user.id === recipientId);
+
+  if (!recipient) {
+    return (
+      <div className="flex items-center justify-center h-full text-red-500 font-semibold">
+        Recipient not found.
+      </div>
+    );
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -106,7 +114,7 @@ const Chat: React.FC<ChatProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-[600px] bg-white rounded-lg shadow-lg">
+    <div className="flex flex-col h-full w-full bg-white rounded-lg shadow-lg">
       {/* Chat Header */}
       <div className="flex items-center p-4 border-b">
         <img
@@ -135,7 +143,7 @@ const Chat: React.FC<ChatProps> = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ minHeight: 0 }}>
         {messages.map((message, index) => {
           const isOwnMessage = message.senderId !== recipientId;
           const sender = mockUsers.find(user => user.id === message.senderId);
@@ -146,7 +154,7 @@ const Chat: React.FC<ChatProps> = ({
               className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[70%] ${
+                className={`max-w-[70%] break-words ${
                   isOwnMessage
                     ? 'bg-teal-500 text-white rounded-l-lg rounded-tr-lg'
                     : 'bg-gray-100 text-gray-900 rounded-r-lg rounded-tl-lg'
@@ -182,9 +190,9 @@ const Chat: React.FC<ChatProps> = ({
 
                 <div className="flex items-center justify-end mt-1 space-x-2">
                   <span className="text-xs opacity-75">
-                    {new Date(message.createdAt).toLocaleTimeString()}
+                    {new Date(message.timestamp).toLocaleTimeString()}
                   </span>
-                  {isOwnMessage && renderMessageStatus(message.status)}
+                  {renderMessageStatus(message.status)}
                 </div>
               </div>
             </div>
@@ -193,47 +201,53 @@ const Chat: React.FC<ChatProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
-      <form onSubmit={handleSubmit} className="p-4 border-t">
-        <div className="flex items-center space-x-2">
+      {/* Typing indicator */}
+      {isTyping && (
+        <div className="px-4 py-2 text-sm text-gray-500 flex items-center">
+          <span className="animate-pulse mr-2">...</span>
+          {recipient.name} is typing
+        </div>
+      )}
+
+      {/* Footer / Message Input */}
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-2 p-4 border-t bg-white sticky bottom-0"
+        style={{ zIndex: 10 }}
+      >
+        <label className="cursor-pointer">
+          <Paperclip size={20} className="text-gray-400" />
           <input
             type="file"
             accept="image/*"
-            id="image-upload"
             className="hidden"
             onChange={handleFileUpload}
           />
-          <label
-            htmlFor="image-upload"
-            className="p-2 text-gray-500 hover:text-teal-500 transition-colors cursor-pointer"
-          >
-            <Image size={20} />
-          </label>
-          <button
-            type="button"
-            onClick={handleShareLocation}
-            className="p-2 text-gray-500 hover:text-teal-500 transition-colors"
-          >
-            <MapPin size={20} />
-          </button>
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.target.value);
-              handleTyping();
-            }}
-            placeholder="Type your message..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim()}
-            className="p-2 text-white bg-teal-500 rounded-full hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send size={20} />
-          </button>
-        </div>
+        </label>
+        <button
+          type="button"
+          onClick={handleShareLocation}
+          className="p-2 rounded-full hover:bg-gray-100"
+          title="Share location"
+        >
+          <MapPin size={20} className="text-gray-400" />
+        </button>
+        <input
+          type="text"
+          className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400"
+          placeholder="Type your message..."
+          value={newMessage}
+          onChange={e => {
+            setNewMessage(e.target.value);
+            handleTyping();
+          }}
+        />
+        <button
+          type="submit"
+          className="bg-teal-500 hover:bg-teal-600 text-white rounded-full p-2 transition"
+        >
+          <Send size={20} />
+        </button>
       </form>
     </div>
   );

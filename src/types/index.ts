@@ -85,6 +85,7 @@ export interface Review {
 }
 
 export interface Message {
+  timestamp: any;
   id: string;
   senderId: string;
   receiverId: string;

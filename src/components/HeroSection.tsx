@@ -14,25 +14,23 @@ const HeroSection: React.FC = () => {
 
       tl.from('.hero-title', {
         y: 30,
-        opacity: 0,
-        duration: 0.8,
+        opacity: 1.8,
+        duration: 0.6,
         ease: 'power3.out'
       })
         .from('.hero-subtitle', {
           y: 20,
-          opacity: 0,
-          duration: 0.6,
+          opacity: 0.8,
           ease: 'power3.out'
         }, '-=0.4')
         .from('.hero-search', {
           y: 20,
-          opacity: 0,
-          duration: 0.6,
+          opacity: 1,
           ease: 'power3.out'
         }, '-=0.2')
         .from('.feature-item', {
           y: 20,
-          opacity: 0,
+          opacity: 0.8,
           duration: 0.6,
           stagger: 0.1,
           ease: 'power3.out'
