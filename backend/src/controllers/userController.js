@@ -21,6 +21,23 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+// Get user by ID
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    // Ensure avatar is a full URL
+    if (user.avatar && !user.avatar.startsWith('http')) {
+      user.avatar = `${req.protocol}://${req.get('host')}/uploads/avatars/${user.avatar}`;
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
 exports.uploadAvatar = async (req, res) => {
   try {
     if (!req.user) {
@@ -30,7 +47,7 @@ exports.uploadAvatar = async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
     // Update user's avatar in DB
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const avatarUrl = `${req.protocol}://${req.get('host')}/uploads/avatars/${req.file.filename}`;
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id || req.user.id, // Support both _id and id
       { avatar: avatarUrl },
