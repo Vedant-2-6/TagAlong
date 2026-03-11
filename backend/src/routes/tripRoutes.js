@@ -3,7 +3,8 @@ const router = express.Router();
 const tripController = require('../controllers/tripController');
 const authenticate = require('../middlewares/auth');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/aadhaar/' }); // temp storage
+// Use memory storage to completely remove local directory dependencies and enable cloud deployments
+const upload = multer({ storage: multer.memoryStorage() });
 
 // OCR Aadhaar
 router.post('/ocr/aadhaar', upload.single('aadhaar'), tripController.aadhaarOcr);

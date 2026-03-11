@@ -3,8 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
 import { Chat, Message as MessageType } from '../types';
-import { Send, Image, MapPin, ArrowLeft, Phone, Video, MoreVertical, Search, MessageSquare } from 'lucide-react';
+import { Send, Image, MapPin, ArrowLeft, Search, MessageSquare, UserCheck } from 'lucide-react';
 import gsap from 'gsap';
+import { getAvatarSrc } from '../utils/avatar';
 
 const ChatPage: React.FC = () => {
   const {
@@ -95,23 +96,11 @@ const ChatPage: React.FC = () => {
   //   }
   // }, [messages, activeChat]);
 
-  // Track if the current user just sent a message
-  const [justSentMessage, setJustSentMessage] = useState(false);
-
-  // Scroll to bottom only when the current user sends a message
-  // useEffect(() => {
-  //   if (messagesEndRef.current && justSentMessage) {
-  //     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  //     setJustSentMessage(false);
-  //   }
-  // }, [justSentMessage]);
-
   const handleSendMessage = () => {
     if (!messageInput.trim() || !activeChat || !currentUser) return;
 
     sendMessage(activeChat, messageInput, 'text');
     setMessageInput('');
-    setJustSentMessage(true); // Set flag when user sends a message
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -307,7 +296,7 @@ const ChatPage: React.FC = () => {
                       <div className="flex items-start">
                         <div className="relative">
                           <img
-                            src={chat.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(chat.user?.name || 'User')}&background=0D8ABC&color=fff`}
+                            src={getAvatarSrc(chat.user?.avatar, chat.user?.name)}
                             alt={chat.user?.name}
                             className="w-12 h-12 rounded-full object-cover"
                           />
@@ -363,40 +352,42 @@ const ChatPage: React.FC = () => {
                     if (!activeUserChat) return null;
 
                     return (
-                      <div className="flex items-center">
-                        <div className="relative">
-                          <img
-                            src={activeUserChat.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(activeUserChat.user?.name || 'User')}&background=0D8ABC&color=fff`}
-                            alt={activeUserChat.user?.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ${activeUserChat.user?.onlineStatus === 'online' ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'} border-2 border-white dark:border-gray-800`}></span>
+                      <>
+                        <div className="flex items-center">
+                          <div className="relative">
+                            <img
+                              src={getAvatarSrc(activeUserChat.user?.avatar, activeUserChat.user?.name)}
+                              alt={activeUserChat.user?.name}
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                            <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ${activeUserChat.user?.onlineStatus === 'online' ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'} border-2 border-white dark:border-gray-800`}></span>
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{activeUserChat.user?.name}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {typingStatus[activeChat] ? (
+                                <span className="text-teal-500">Typing...</span>
+                              ) : (
+                                activeUserChat.user?.onlineStatus === 'online' ? 'Online' : 'Offline'
+                              )}
+                            </p>
+                          </div>
                         </div>
-                        <div className="ml-3">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">{activeUserChat.user?.name}</h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {typingStatus[activeChat] ? (
-                              <span className="text-teal-500">Typing...</span>
-                            ) : (
-                              activeUserChat.user?.onlineStatus === 'online' ? 'Online' : 'Offline'
-                            )}
-                          </p>
+
+                        <div className="ml-auto flex space-x-2">
+                          {activeUserChat.user && (
+                            <button 
+                              onClick={() => navigate(`/profile/${activeUserChat.user._id}`)}
+                              className="text-gray-600 dark:text-gray-400 hover:text-teal-500 transition-colors flex items-center text-sm px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full"
+                              title="View Profile"
+                            >
+                              <UserCheck size={16} className="mr-1" /> Profile
+                            </button>
+                          )}
                         </div>
-                      </div>
+                      </>
                     );
                   })()}
-
-                  <div className="ml-auto flex space-x-2">
-                    <button className="text-gray-600 dark:text-gray-400 hover:text-teal-500 transition-colors">
-                      <Phone size={20} />
-                    </button>
-                    <button className="text-gray-600 dark:text-gray-400 hover:text-teal-500 transition-colors">
-                      <Video size={20} />
-                    </button>
-                    <button className="text-gray-600 dark:text-gray-400 hover:text-teal-500 transition-colors">
-                      <MoreVertical size={20} />
-                    </button>
-                  </div>
                 </div>
 
                 {/* Chat Messages */}
@@ -430,7 +421,7 @@ const ChatPage: React.FC = () => {
                                   const senderChat = chats.find(chat => chat.user?._id === message.senderId);
                                   return (
                                     <img
-                                      src={senderChat?.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(senderChat?.user?.name || 'User')}&background=0D8ABC&color=fff`}
+                                      src={getAvatarSrc(senderChat?.user?.avatar, senderChat?.user?.name)}
                                       alt={senderChat?.user?.name || 'User'}
                                       className="w-8 h-8 rounded-full object-cover"
                                     />
