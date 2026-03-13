@@ -1,6 +1,5 @@
 node_modules
 npm-debug.log
-.env
 .env.local
 .env.*.local
 .git
@@ -8,9 +7,25 @@ npm-debug.log
 README.md
 .DS_Store
 *.log
-dist
-build
 coverage
 .vscode
 .idea
+*.stackdump
 
+# Backend test files
+backend/test-*
+backend/uploads
+
+# Frontend source (only dist is needed, built in Stage 1)
+frontend/node_modules
+frontend/dist
+frontend/.env.local
+
+# Docker files (not needed inside container)
+Dockerfile*
+docker-compose.yml
+.dockerignore
+
+# Scripts and misc
+scripts
+bash.exe.stackdump

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const parcelController = require('../controllers/parcelcontroller');
+const parcelController = require('../controllers/parcelController');
 const auth = require('../middlewares/auth');
 
 // Create parcel request (requires authentication)

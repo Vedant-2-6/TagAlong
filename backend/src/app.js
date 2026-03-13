@@ -17,16 +17,17 @@ const adminRoutes = require('./routes/adminRoutes');
 
 require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
-// Configure CORS for production
+// Configure CORS - in production, frontend is served from same origin
 const allowedOrigins = process.env.FRONTEND_URL
-  ? [process.env.FRONTEND_URL]
+  ? [process.env.FRONTEND_URL, 'http://localhost:5173']
   : ['http://localhost:5173'];
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: isProduction ? true : allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -43,8 +44,8 @@ mongoose.connect(process.env.MONGO_URI);
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    // Allow requests with no origin or in production (single container)
+    if (!origin || isProduction) return callback(null, true);
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -246,9 +247,29 @@ io.on('connection', (socket) => {
 
 // Serve frontend static files in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../frontend/dist')));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+  const fs = require('fs');
+  // Docker path (unified Dockerfile copies dist to frontend-dist/)
+  const dockerPath = path.join(__dirname, '../frontend-dist');
+  // Local/Azure direct deploy path (monorepo structure)
+  const localPath = path.join(__dirname, '../../frontend/dist');
+  
+  const staticPath = fs.existsSync(dockerPath) ? dockerPath : localPath;
+  console.log(`Serving static files from: ${staticPath}`);
+  
+  app.use(express.static(staticPath));
+  
+  // SPA Fallback: send index.html for any unhandled GET request NOT starting with /api
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api') && req.accepts('html')) {
+      const indexPath = path.join(staticPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send('Frontend build not found');
+      }
+    } else {
+      next();
+    }
   });
 }
 
